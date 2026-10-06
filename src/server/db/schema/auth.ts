@@ -1,9 +1,7 @@
 // Tables required by Better Auth (user, session, account, verification),
-// plus the username plugin fields and our `role` field.
+// plus the username plugin fields. Roles live in `user_role` (accounts.ts).
 // Column names must match what Better Auth expects; don't rename fields.
-import { boolean, index, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
-
-export const roleEnum = pgEnum("role", ["student", "parent", "teacher", "adviser", "admin"]);
+import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text().primaryKey(),
@@ -15,7 +13,6 @@ export const user = pgTable("user", {
   image: text(),
   username: text().unique(), // student number, e.g. 2099-0001 (stored lowercase)
   displayUsername: text(),
-  role: roleEnum().notNull().default("student"),
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
