@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AJV Learning Portal
 
-## Getting Started
+New LMS for Academia de Julia Victoria (replacing GascloudLMS).
+Product rules: [`.claude/skills/ajv-lms/SKILL.md`](.claude/skills/ajv-lms/SKILL.md) · Audit of the old system: [`docs/AUDIT.md`](docs/AUDIT.md) · Old screens: `screens/` (local only, not in the repo: contains real student data)
 
-First, run the development server:
+**Stack:** Next.js 16 · TypeScript · shadcn/ui · PostgreSQL 16 · Drizzle · Better Auth · pnpm
+
+## First-time setup (Windows)
+
+Requires Node 22+, pnpm, and PostgreSQL 16 running locally.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env` is already generated locally (copy `.env.example` on a new machine and fill it in). Then:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm db:setup      # creates the ajvlms database + user (asks for your postgres password once)
+pnpm db:migrate    # creates the tables
+pnpm db:seed       # adds one test account per role (password = SEED_PASSWORD in .env)
+pnpm dev           # http://localhost:3100
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Seed usernames: `admin`, `t-0001` (teacher), `2099-0001` (student), `p-0001` (parent).
 
-## Learn More
+## Everyday commands
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command | What it does |
+|---|---|
+| `pnpm dev` | Dev server on port 3100 |
+| `pnpm typecheck` / `pnpm lint` | Checks |
+| `pnpm db:generate` | After editing `src/server/db/schema/*`, creates a new migration in `drizzle/` |
+| `pnpm db:migrate` | Applies pending migrations |
+| `pnpm db:studio` | Browse the database in the browser |
