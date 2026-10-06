@@ -7,9 +7,12 @@ description: Product, domain, and UI rules for rebuilding the Academia de Julia 
 
 You are building the new LMS for **Academia de Julia Victoria** (a Catholic K–12 school in Bacoor, Cavite, Philippines). It replaces a hosted GascloudLMS instance (a Metronic admin template).
 
+This skill holds **product** knowledge. Engineering rules live in `CLAUDE.md` (the constitution) and `docs/architecture.md`; if anything here conflicts with them, the constitution wins.
+
 Read these before making product decisions:
-- `screens/INDEX.md` + `screens/*.jpg`: the current system, 38 screenshots (student role)
-- `docs/AUDIT.md`: what's wrong with it, by role, with a grades deep-dive and open questions
+- `docs/AUDIT.md`: what's wrong with the old system, by role, with a grades deep-dive
+- `docs/design-brief.md`: what to keep / improve / replace from the old design, plus screens and components
+- `screens/` (local only, never committed: real student data): 38 screenshots of the old system, for **what** it did, not how the new one looks
 
 **The main goal: a student or parent can answer "How am I doing?" and "What do I need to do next?" in one screen each.** If a design doesn't make one of those easier, question why it's there.
 
@@ -21,11 +24,12 @@ Read these before making product decisions:
 |---|---|
 | **Student** | See what's due, do lessons/quizzes/assignments, see grades + feedback, message teachers |
 | **Parent/Guardian** | Read-only view of one or more children: grades, missing work, schedule, announcements |
-| **Teacher** | Build/copy courses, post activities, grade in a gradebook, release grades, give feedback, announce to a class |
-| **Adviser** | A teacher who also owns a section: conduct grades, sees all subjects for their section |
-| **Admin/Registrar** | Accounts (bulk import), sections, terms, course assignment, grading policy, report cards |
+| **Teacher** (`staff` + *teaches* assignment) | Build/copy courses, post activities, grade in a gradebook, release grades, give feedback, announce to a class |
+| **Adviser** (`staff` + *advises* assignment, not a role) | Owns a section for a school year: conduct grades, sees **released** grades for all subjects of the section |
+| **Principal** | Read-only view of all grades and reports; approves grade change requests after finalization |
+| **Admin/Registrar** | Accounts (bulk import), sections, terms, course assignment, grading policy, finalization, report cards |
 
-Check permissions on the server for every endpoint. Parents and students only ever see **released** grades.
+A user may hold several roles (e.g. a teacher who is also a parent). Permission rules: `CLAUDE.md` §3. Parents and students only ever see **released** grades.
 
 ## 2. Domain model (the names to use everywhere)
 
@@ -73,7 +77,7 @@ Every gradable item for a student is in **exactly one** of these states. Use the
 4. Show the **initial grade and the transmuted grade** separately only to teachers; students and parents see the transmuted grade + descriptor (Outstanding / Very Satisfactory / Satisfactory / Fairly Satisfactory / Did Not Meet Expectations).
 5. Every score shows **raw + percent**: `18/20 · 90%`.
 6. Quizzes with several attempts show **all attempts**, with the counted one marked, and the rule stated ("Highest attempt counts").
-7. Grades become visible only when the teacher **releases** them (per activity or in bulk). Releasing triggers a notification.
+7. Lifecycle **Draft → Released → Finalized** (`CLAUDE.md` §4). Students/parents see grades only once released (per activity or in bulk); releasing triggers a notification. Corrections after release show "Updated <date>". After finalization, changes need a principal-approved request.
 8. Feedback appears **next to the score** in the grades list (first line + "more"), not only inside the activity.
 9. "Missed / Pending / Locked" counts must always **link to the filtered list**.
 10. Score bands (for color only; also include a text label for accessibility): ≥90 Outstanding, 85–89 Very Satisfactory, 80–84 Satisfactory, 75–79 Fairly Satisfactory, <75 Did Not Meet Expectations.
@@ -96,28 +100,15 @@ Pattern: `/courses/:courseId`, `/courses/:courseId/activities/:activityId`, `/gr
 
 Virtual Classroom: all four tabs were empty today. Don't rebuild it until the school confirms it's used; a `live_class` activity with a meeting link is the fallback.
 
-## 6. Visual language (from the current brand)
+## 6. Visual design
 
-Keep the school identity; drop the generic Metronic look.
+**Comes from Claude Design.** The hand-off is `docs/design-brief.md` (keep / improve / replace decisions, screen list, components, status chip). Until designs arrive, build with plain shadcn defaults and the tokens in `src/app/globals.css`; never hard-code colors or fonts (`CLAUDE.md` §8).
 
-```css
---brand-magenta: #D6336C;  /* script wordmark + logo ring (sample from the real logo file) */
---brand-green:   #4A8645;  /* lesson-player breadcrumb bar + logo laurel */
---ink:           #1E1E2D;  /* old sidebar navy, use for text and dark surfaces */
---primary:       #3B6FE0;  /* actions */
---success:       #1BA99F;  /* graded / outstanding */
---warning:       #F2A20C;  /* due soon / late */
---danger:        #E5484D;  /* missing / below 75 */
---info:          #3B82F6;  /* submitted */
---surface:       #F5F6FA;  --card: #FFFFFF;
-font-family: Poppins, system-ui, sans-serif;  /* already in use */
-```
-
-- Body text **≥ 15px**, contrast **≥ 4.5:1**. (The current site uses light grey ~12px text; don't copy that.)
-- **Mobile first**: bottom tab bar on phones; tables become stacked cards below 640px.
-- Empty states get an illustration/icon + one sentence + an action. Never use the bare "[ No … found ]".
-- Every async area shows skeleton loaders (the current PDF embed shows a blank grey box).
-- Wordmark: use the school's script logo image. Don't try to recreate it in a font.
+Product UX rules that hold whatever the design:
+- Body text ≥ 15px, contrast ≥ 4.5:1; never convey meaning by color alone.
+- Mobile first; tables become stacked cards below ~640px.
+- Empty states: icon + one sentence + an action (never "[ No … found ]"). Skeleton loaders for async content.
+- Use the school's official crest and script wordmark as images.
 
 ## 7. Copy and language
 
@@ -135,7 +126,7 @@ font-family: Poppins, system-ui, sans-serif;  /* already in use */
 - [ ] Empty, loading, and error states are designed
 - [ ] Role checks happen on the server; parents and students only see released grades
 - [ ] Keyboard navigable, 4.5:1 contrast, labels on icon buttons
-- [ ] Compared against the matching `screens/*.jpg` so no existing feature is silently dropped
+- [ ] Checked against `docs/design-brief.md` (and the local `screens/`) so no old feature is silently dropped and nothing old is copied by accident
 
 ## 9. Tech stack (approved 2026-10-06)
 
@@ -144,12 +135,12 @@ Solo developer + Claude, so keep it to **one Next.js app**: no monorepo, no micr
 | Layer | Choice |
 |---|---|
 | App | **Next.js (App Router) + TypeScript strict**, React Server Components for reads |
-| UI | **shadcn/ui + Tailwind CSS + lucide-react**; theme tokens from §6 go in `globals.css` |
-| API | **REST** via Route Handlers at `/api/v1/*`; OpenAPI generated from Zod schemas. **All writes go through REST.** No Server Actions that do things the API can't |
-| Validation | **Zod**, with schemas in `src/lib/schemas/` shared by forms and the API |
+| UI | **shadcn/ui + Tailwind CSS + lucide-react**; design tokens in `globals.css` (from Claude Design) |
+| API | **REST** via Route Handlers at `/api/v1/*`; OpenAPI (dev only) generated from Zod schemas. **All writes go through REST. No Server Actions** |
+| Validation | **Zod**, in each feature's `schemas.ts`, shared by forms and the API |
 | DB | **PostgreSQL** + **Drizzle ORM** + drizzle-kit migrations (committed, never `push` in prod) |
-| Auth | **Better Auth**: username = student number + password; roles: student, parent, teacher, adviser, admin. Google SSO can be added later |
-| Authorization | One `can(user, action, resource)` layer in `src/server/authz/`; every route handler calls it |
+| Auth | **Better Auth**: username = student number + password. Roles + assignments per `CLAUDE.md` §3. Google SSO can be added later |
+| Authorization | `can(user, action, resource)` core in `src/server/authz/`, rules in each feature's `policy.ts`; every service calls it (gate) and every repo query is scoped (filter) |
 | Tables | **TanStack Table** (gradebook, reports) |
 | Client data | **TanStack Query** for interactive views (gradebook inline edit) |
 | Forms | React Hook Form + Zod |
@@ -163,7 +154,7 @@ Solo developer + Claude, so keep it to **one Next.js app**: no monorepo, no micr
 | Notifications | `notifications` table + SSE endpoint |
 | Testing | **Vitest** (grade engine: 100% coverage, table-driven) + **Playwright** (main flow for each role) |
 | Observability | pino logs + Sentry |
-| Tooling | pnpm, ESLint + Prettier, Husky, GitHub Actions CI |
+| Tooling | pnpm, ESLint (+ boundaries), Husky + lint-staged, GitHub Actions CI, gitleaks |
 
 ### Hosting: Hostinger **KVM VPS** (not shared/Cloud hosting, which has no PostgreSQL). **No Docker.**
 - KVM 2 or higher, **Singapore** data center, plain Ubuntu LTS.
@@ -174,10 +165,8 @@ Solo developer + Claude, so keep it to **one Next.js app**: no monorepo, no micr
 - Nightly cron: `pg_dump` + uploads folder copied **off the VPS** (Cloudflare R2 or Backblaze B2), keep 30 days, test restoring once a month.
 - **Local dev (Windows):** PostgreSQL for Windows installed natively, `pnpm dev`, uploads to `./.uploads`. Keep the same major Postgres + Node versions as the server (pin them in `.nvmrc` and the README).
 
-### Non-negotiables
-1. **Grade engine** lives in `src/server/grades/` as pure functions (no DB calls), fully unit-tested. On release, store a **snapshot** of computed grades so later edits never silently change a released grade.
-2. **Audit log** for every grade/score change (who, when, old → new). Needed for disputes and RA 10173 (Data Privacy Act) compliance.
-3. Every page has its own URL (§5).
+### Engineering rules
+Layers, data flow, permissions, grades/audit, database, API and security rules are in **`CLAUDE.md`** (full detail in `docs/architecture.md`, reasons in `docs/adr/`). The grade engine lives in `src/features/grades/engine/`.
 
 ### Scale: ~500 students (plus their parents and ~30–50 staff)
 Small for a single VPS. The risk is **spikes**, not totals: everyone opens Grades within minutes of a release, or of report-card day.
@@ -190,18 +179,8 @@ Small for a single VPS. The risk is **spikes**, not totals: everyone opens Grade
 - **Load test before launch:** simulate 500 logins + grade views in 5 minutes (k6 or autocannon). Target p95 < 500 ms on KVM 2.
 
 ### Folder layout
-```
-src/
-  app/(auth)/login
-  app/(student)/home, courses, grades, calendar, messages
-  app/(teacher)/gradebook, courses/[id]/edit
-  app/(admin)/setup
-  app/api/v1/**/route.ts
-  components/ui        (shadcn)   components/lms   (StatusChip, GradeBadge, ProgressBar…)
-  server/db (drizzle schema)  server/authz  server/grades  server/jobs
-  lib/schemas (zod)
-```
+See `CLAUDE.md` §1 (feature-first: `src/features/<name>/` with `index.ts`, `service.ts`, `policy.ts`, `repo.ts`, `schemas.ts`, `engine/`, `ui/`). Route groups in `src/app/`: `(auth)`, `(student)`, `(parent)`, `(teacher)`, `(admin)`, plus `api/v1/`.
 
 ## 10. Open decisions (don't invent answers; ask the user)
 
-Grading weights & transmutation · term vs quarter · attempt rule · parent accounts · report card generation · keep or drop virtual classroom · migrating data from Gascloud. See `docs/AUDIT.md` §6.
+For the school: grading weights & transmutation table · term vs quarter · default quiz attempt rule · missing-work policy (default: 0 once marked Missing) · report card generation · keep or drop virtual classroom · migrating data from Gascloud · audit-log retention period · Data Privacy Act duties (DPO, consent, breach plan). See `docs/AUDIT.md` §6.

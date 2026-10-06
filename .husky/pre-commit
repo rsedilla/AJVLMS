@@ -1,0 +1,4 @@
+# CLAUDE.md §10: these checks must pass before any commit.
+node scripts/check-staged.mjs
+pnpm exec lint-staged
+pnpm typecheck
