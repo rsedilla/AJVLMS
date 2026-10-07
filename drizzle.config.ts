@@ -2,7 +2,8 @@ import "dotenv/config";
 import { defineConfig } from "drizzle-kit";
 
 export default defineConfig({
-  schema: "./src/server/db/schema",
+  // The entry file, not the folder: the folder also holds *.test.ts files.
+  schema: "./src/server/db/schema/index.ts",
   out: "./drizzle",
   dialect: "postgresql",
   casing: "snake_case",

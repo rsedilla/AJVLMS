@@ -14,6 +14,9 @@ A single role per user can't express real cases: a teacher who is also a parent,
 ### The one exception: building the Actor
 `getCurrentActor()` / `requireActor()` in `features/accounts` load the signed-in user's own roles **without** calling `can()`, because every `can()` check needs an Actor to exist first. This is safe only because they read nothing but the session user's own id. **This exception is not a pattern:** every other service function must call `can()`. An `Actor` must come from `getCurrentActor`/`requireActor` (or, later, a documented system actor for jobs), never be built by hand in feature code.
 
+### When the gate needs the resource's relationships
+Some checks depend on data about the resource (e.g. "is the caller an active adviser of this student's section?"). Fetching without a filter and then checking is **not enough**: the repo query must still include the actor-scoped predicate (see `findActiveEnrollmentVisibleTo` in `features/school/repo.ts`), so removing the gate never leaks data. Pattern: cheap role gate → actor-scoped query → gate on the fetched row.
+
 ## Consequences
 - A forgotten gate check is still caught by the filter (defense in depth).
 - Every policy rule needs allowed and denied tests.

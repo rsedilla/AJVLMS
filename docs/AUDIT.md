@@ -161,7 +161,7 @@ Virtual Classroom → Schedule / Invites / Groups / History. All four were **emp
 ## 6. Questions to answer before designing (for the school)
 
 1. **Grading policy:** Does AJV use DepEd Order No. 8, s. 2015 component weights (WW / PT / QA, varying by subject) and the transmutation table? Or its own scheme? Is there a separate conduct grade?
-2. **Terms:** Are "T1/T2/T3" trimesters or quarters? The UI uses both terms.
+2. ~~**Terms:** Are "T1/T2/T3" trimesters or quarters?~~ **Answered 2026-10-07:** three terms per school year; the school year runs June → March. Grade levels: Nursery, Kinder, Grade 1–10.
 3. **Quiz attempts:** Which attempt counts: highest, latest, or average?
 4. **Grade release:** Should students see each score right away, or only after the teacher releases it?
 5. **Parents:** Should parents get their own login? Should one parent be able to see several children?
