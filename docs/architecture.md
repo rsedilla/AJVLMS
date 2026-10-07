@@ -62,7 +62,7 @@ Decisions were agreed on 2026-10-07. Changing one requires an ADR in `docs/adr/`
 ## Database & API conventions
 **Database**
 - D1 UUID v7 ids, generated in the app (Better Auth tables keep their own text ids).
-- D2 `timestamptz`, stored UTC, displayed Asia/Manila.
+- D2 Instants: `timestamptz`, stored UTC, displayed Asia/Manila. Calendar days (school year/term boundaries, date-only due dates): `date`, a Manila calendar day (ADR 0009).
 - D3 Scores/grades use `numeric`, never float.
 - D4 Fixed value lists = `text` + CHECK constraint (no Postgres enums). → convert the current `role` enum.
 - D5 Academic records are never hard-deleted; use `archived_at`.

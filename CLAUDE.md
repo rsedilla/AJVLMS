@@ -55,7 +55,7 @@ src/lib/              browser-safe helpers
 - Audit log (append-only, enforced by Postgres grants): score changes, releases, finalization, admin edits + reason, policy/role/assignment changes, admin/principal grade views, password resets.
 
 ## 5. Database [D1–D7 BLOCKING]
-D1 UUID v7 ids (app-generated) · D2 `timestamptz`, UTC, shown Asia/Manila · D3 `numeric` for scores, never float ·
+D1 UUID v7 ids (app-generated) · D2 instants: `timestamptz` (UTC, shown Asia/Manila); calendar days: `date` (ADR 0009) · D3 `numeric` for scores, never float ·
 D4 `text` + CHECK, no pg enums · D5 archive (`archived_at`), never delete academic records ·
 D6 index every FK; business rules as constraints · D7 generated migrations, expand → migrate → contract ·
 D8 singular snake_case · D9 fictional seed data only.

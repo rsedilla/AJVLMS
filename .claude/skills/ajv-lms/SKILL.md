@@ -34,8 +34,8 @@ A user may hold several roles (e.g. a teacher who is also a parent). Permission 
 ## 2. Domain model (the names to use everywhere)
 
 ```
-SchoolYear 1─* Term                 (e.g. SY 2026-2027 → T1, T2, T3; confirm "term" vs "quarter" with the school)
-GradeLevel 1─* Section              (Grade 8 → Rizal)
+SchoolYear 1─* Term                 (runs June → March; exactly 3 terms, confirmed by the school 2026-10-07)
+GradeLevel 1─* Section              (Nursery, Kinder, Grade 1–10; sections per level vary with enrollment)
 Section *─* Student                 (Student.studentNo = "2099-0001", the login username)
 Subject                             (Math 8, MAPEH 8, Filipino 8 …), which has a GradingPolicy
 Course = Subject × Section × Term   (one teacher owns it; its display name is GENERATED, never typed by hand)
@@ -183,4 +183,5 @@ See `CLAUDE.md` §1 (feature-first: `src/features/<name>/` with `index.ts`, `ser
 
 ## 10. Open decisions (don't invent answers; ask the user)
 
-For the school: grading weights & transmutation table · term vs quarter · default quiz attempt rule · missing-work policy (default: 0 once marked Missing) · report card generation · keep or drop virtual classroom · migrating data from Gascloud · audit-log retention period · Data Privacy Act duties (DPO, consent, breach plan). See `docs/AUDIT.md` §6.
+Answered: school year June → March, 3 terms, levels Nursery/Kinder/Grade 1–10 (2026-10-07).
+Still open for the school: grading weights & transmutation table · default quiz attempt rule · missing-work policy (default: 0 once marked Missing) · report card generation · keep or drop virtual classroom · migrating data from Gascloud · audit-log retention period · Data Privacy Act duties (DPO, consent, breach plan). See `docs/AUDIT.md` §6.

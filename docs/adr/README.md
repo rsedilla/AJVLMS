@@ -12,3 +12,4 @@ Short records of **why** a decision was made. To change a rule in `CLAUDE.md`, a
 | [0006](0006-grade-lifecycle-and-snapshots.md) | Grade lifecycle and snapshots | Accepted |
 | [0007](0007-append-only-audit-log.md) | Append-only audit log enforced in Postgres | Accepted |
 | [0008](0008-public-repo-during-development.md) | Public repository during development | Accepted |
+| [0009](0009-calendar-dates-vs-instants.md) | Calendar dates use `date`; instants use `timestamptz` | Accepted |
