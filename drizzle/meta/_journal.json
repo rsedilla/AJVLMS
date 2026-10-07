@@ -8,6 +8,27 @@
       "when": 1791304426610,
       "tag": "0000_wet_human_robot",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791326493920,
+      "tag": "0001_roles_expand",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791326500495,
+      "tag": "0002_roles_migrate_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791326514345,
+      "tag": "0003_roles_contract",
+      "breakpoints": true
     }
   ]
 }
