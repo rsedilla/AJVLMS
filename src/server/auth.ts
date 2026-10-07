@@ -18,12 +18,7 @@ export const auth = betterAuth({
     disableSignUp: true,
     minPasswordLength: 8,
   },
-  user: {
-    additionalFields: {
-      // Clients can never set their own role.
-      role: { type: "string", required: false, defaultValue: "student", input: false },
-    },
-  },
+  // Roles are not part of the auth user: they live in user_role and are loaded by features/accounts.
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // refresh once a day

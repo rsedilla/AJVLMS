@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { hashPassword } from "better-auth/crypto";
 import { Pool } from "pg";
 import * as schema from "../src/server/db/schema";
+import type { Role } from "../src/lib/roles";
 
 if (process.env.NODE_ENV === "production") throw new Error("Refusing to seed in production.");
 const password = process.env.SEED_PASSWORD;
@@ -15,12 +16,15 @@ if (!password || password.length < 8) throw new Error("Set SEED_PASSWORD (8+ cha
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool, { schema, casing: "snake_case" });
 
-const accounts = [
-  { username: "admin", name: "Registrar Admin", role: "admin" },
-  { username: "t-0001", name: "Test Teacher", role: "teacher" },
-  { username: "2099-0001", name: "Test Student", role: "student" },
-  { username: "p-0001", name: "Test Parent", role: "parent" },
-] as const;
+// Fictional accounts only (D9). A user may hold several roles (CLAUDE.md §3).
+const accounts: { username: string; name: string; roles: Role[] }[] = [
+  { username: "admin", name: "Registrar Admin", roles: ["admin"] },
+  { username: "principal", name: "Test Principal", roles: ["principal"] },
+  { username: "t-0001", name: "Test Teacher", roles: ["staff"] },
+  { username: "t-0002", name: "Teacher Who Is Also A Parent", roles: ["staff", "parent"] },
+  { username: "2099-0001", name: "Test Student", roles: ["student"] },
+  { username: "p-0001", name: "Test Parent", roles: ["parent"] },
+];
 
 async function main() {
   const hash = await hashPassword(password!);
@@ -38,7 +42,6 @@ async function main() {
         email: `${a.username}@students.ajv.invalid`,
         username: a.username,
         displayUsername: a.username,
-        role: a.role,
       });
       await tx.insert(schema.account).values({
         id: randomUUID(),
@@ -47,8 +50,9 @@ async function main() {
         userId: id,
         password: hash,
       });
+      await tx.insert(schema.userRole).values(a.roles.map((role) => ({ userId: id, role })));
     });
-    console.log(`added ${a.username} (${a.role})`);
+    console.log(`added ${a.username} (${a.roles.join(", ")})`);
   }
 }
 
