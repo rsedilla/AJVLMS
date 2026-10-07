@@ -22,7 +22,7 @@ pnpm db:seed       # adds one test account per role (password = SEED_PASSWORD in
 pnpm dev           # http://localhost:3100
 ```
 
-Seed usernames: `admin`, `t-0001` (teacher), `2099-0001` (student), `p-0001` (parent).
+Seed usernames: `admin`, `principal`, `t-0001` (staff), `t-0002` (staff + parent), `2099-0001` (student), `p-0001` (parent).
 
 ## Everyday commands
 

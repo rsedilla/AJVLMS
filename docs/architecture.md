@@ -37,7 +37,7 @@ Decisions were agreed on 2026-10-07. Changing one requires an ADR in `docs/adr/`
 ## Permissions
 1. **Base roles + assignments.** Base roles (a user may hold several): `student`, `parent`, `staff`, `principal`, `admin`.
    Assignments, per school year with start/end: *teaches* (course), *advises* (section), *guardian of* (student).
-   → `adviser` is removed as a role; the current `role` enum in `src/server/db/schema/auth.ts` must be migrated.
+   → Implemented: roles live in `user_role` (`src/server/db/schema/accounts.ts`, list in `src/lib/roles.ts`); the old `role` enum was removed by migrations 0001–0003. The signed-in user is loaded as an `Actor` by `features/accounts` (`getCurrentActor` / `requireActor`).
 2. **Two layers, deny by default** (blocking): the gate (`policy.ts` → `can(user, action, resource)`) **and** the filter (every `repo` query scoped to what the user may see). Every policy rule has a test.
 3. **Matrix** (as discussed), including:
    - Advisers see **released** grades for all subjects of their section only.
