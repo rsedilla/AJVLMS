@@ -99,6 +99,7 @@ Decisions were agreed on 2026-10-07. Changing one requires an ADR in `docs/adr/`
 - Data Privacy Act (RA 10173) checklist for the school: **P1 deliverable**.
 
 **Dependencies:** a new package needs a one-line reason in the commit, must be maintained and widely used; prefer what's installed; lockfile committed; install scripts only if allow-listed; Dependabot PRs reviewed weekly.
+Runtime-coupled packages follow the runtime, not the latest release: `@types/node` stays on the Node major we run (`.nvmrc`). Peer-constrained tools are held to what their dependents support (e.g. TypeScript below typescript-eslint's peer range). Both are pinned via `ignore` rules in `.github/dependabot.yml`, each with a comment saying when to remove it.
 
 **Workflow:** feature branch → commit (pre-commit checks) → push → PR → CI → guardian review → merge. **`main` is protected** (CI must pass).
 Enforcement is honest: pre-commit + CI are truly blocking; the AI guardian is instruction-based and reports, the human decides.

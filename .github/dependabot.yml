@@ -8,6 +8,15 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # Node types must match the Node we run (22 on dev machines and the server, see .nvmrc).
+      # Newer types would let code use APIs that type-check but crash at runtime on Node 22.
+      # Remove this when Node itself is upgraded (update .nvmrc, the server and this rule together).
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # typescript-eslint supports TypeScript < 6.1 only. Remove once it supports 6.1+.
+      - dependency-name: "typescript"
+        versions: [">=6.1.0"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: monthly }
