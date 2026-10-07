@@ -55,7 +55,7 @@ Decisions were agreed on 2026-10-07. Changing one requires an ADR in `docs/adr/`
 3. Students/parents see **"Updated <date>"** only. Old values are visible to the teacher, principal and admin.
 4. **Missing work counts as 0 only once the teacher marks it Missing** (until then it shows as Missing but isn't computed). The school may change this default (grading policy setting).
 5. **Grade engine:** pure functions; **grading policy is versioned** and each snapshot stores the policy version; **round once, at the end**; the quiz attempt rule (highest/latest/average) is set per quiz with a school default.
-6. **Audit log is append-only, enforced in PostgreSQL** (the app's DB user has INSERT only on the audit table, no UPDATE/DELETE). It records score changes, releases, finalization, admin edits + reason, policy changes, role/assignment changes, admin/principal views of student grades, and password resets.
+6. **Audit log is append-only, enforced in PostgreSQL** (the app's DB user has INSERT only on the audit table, no UPDATE/DELETE). It records score changes, releases, finalization, admin edits + reason, policy changes, role/assignment changes, admin/principal views of student grades, and password resets. Implemented: triggers reject UPDATE/DELETE/TRUNCATE (migration 0006); the INSERT-only grant arrives with the owner/app database-user split. Writer: `writeAudit(tx, ...)` in `src/server/db/audit.ts`, transaction-only, callable from `repo.ts` only (see ADR 0007).
 7. **Audit retention:** never delete until the registrar confirms the school's record-retention period.
 8. **Grade engine: 100% test coverage with real worked examples** (blocking).
 

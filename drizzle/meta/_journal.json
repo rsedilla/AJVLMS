@@ -36,6 +36,20 @@
       "when": 1791361147551,
       "tag": "0004_school_structure",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791363391223,
+      "tag": "0005_audit_log",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791363392748,
+      "tag": "0006_audit_log_append_only",
+      "breakpoints": true
     }
   ]
 }
