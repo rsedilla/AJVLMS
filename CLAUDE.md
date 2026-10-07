@@ -28,7 +28,7 @@ src/lib/              browser-safe helpers
 - **Only `repo.ts` imports `server/db`.** Sole exception: `src/server/auth.ts` (Better Auth adapter).
 - Jobs live in `src/server/jobs/` and call features via `index.ts`, like pages. Feature `ui/` is display-only (no repo/service/policy/`@/server/*` imports).
 - Route handler = Zod parse → get session user → call one service → return a DTO. Nothing else.
-- Features: accounts · guardians · school · courses · activities · submissions · grades · calendar · messages · notifications · announcements.
+- Features: accounts · guardians · school · courses · activities · submissions · grades · calendar · messages · notifications · announcements · audit (read side).
 - Naming: kebab-case files, PascalCase components, camelCase functions.
 - Enforced by ESLint (`eslint.config.mjs`). Don't loosen a rule to make code pass.
 
@@ -52,7 +52,8 @@ src/lib/              browser-safe helpers
 - Grade pages read **snapshots**; a background job rebuilds them on release/correction. Students see "Updated <date>", not old values.
 - Engine = pure functions in `features/grades/engine/`, **100% coverage with worked examples**.
   Grading policy is versioned (snapshot stores the version). Round once, at the end. Missing = 0 only after the teacher marks it Missing.
-- Audit log (append-only, enforced by Postgres grants): score changes, releases, finalization, admin edits + reason, policy/role/assignment changes, admin/principal grade views, password resets.
+- Audit log (append-only, enforced in Postgres by triggers + grants, ADR 0007): score changes, releases, finalization, admin edits + reason, policy/role/assignment changes, admin/principal grade views, password resets.
+  Write with `writeAudit(tx, …)` (`src/server/db/audit.ts`) from a `repo.ts`, **inside the same transaction** as the change. New actions go in `src/lib/audit-actions.ts`.
 
 ## 5. Database [D1–D7 BLOCKING]
 D1 UUID v7 ids (app-generated) · D2 instants: `timestamptz` (UTC, shown Asia/Manila); calendar days: `date` (ADR 0009) · D3 `numeric` for scores, never float ·
